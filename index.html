@@ -1853,60 +1853,25 @@ function toast(msg, type) {
   }
 })();
 </script>
-<script>
-(function () {
-  const TITLE = "Purple on Purpose - Alburnett Community Schools";
-  const FAVICON = "https://alburnettcsd.org/favicon.ico";
+  <script>
+(function() {
+  let activated = false;
 
-  // Wait until page is fully safe
-  window.addEventListener("load", function () {
+  function enableLeaveWarning() {
+    if (activated) return;
+    activated = true;
 
-    function setTitle() {
-      if (document.title !== TITLE) {
-        document.title = TITLE;
-      }
-    }
+    window.addEventListener("beforeunload", function(e) {
+      // Modern browsers ignore custom messages
+      e.preventDefault();
+      e.returnValue = ""; // Required for Chrome, Edge, Firefox
+    });
+  }
 
-    function setFavicon() {
-      const head = document.head;
-      if (!head) return;
-
-      // Check if already set
-      const existing = head.querySelector("link[rel='icon']");
-      if (existing && existing.href.includes("alburnettcsd.org")) return;
-
-      // Create WITHOUT deleting others (prevents breaking sites)
-      const link = document.createElement("link");
-      link.rel = "icon";
-      link.href = FAVICON + "?v=" + Date.now();
-
-      head.appendChild(link);
-    }
-
-    // Initial apply
-    setTitle();
-    setFavicon();
-
-    // Light enforcement (ONLY title, avoids breaking page)
-    setInterval(setTitle, 3000);
-
-    // ⚠️ Leave warning (only after user interaction)
-    let activated = false;
-
-    function enableLeaveWarning() {
-      if (activated) return;
-      activated = true;
-
-      window.addEventListener("beforeunload", function (e) {
-        e.preventDefault();
-        e.returnValue = "";
-      });
-    }
-
-    window.addEventListener("click", enableLeaveWarning);
-    window.addEventListener("keydown", enableLeaveWarning);
-
-  });
+  // Activate on first user interaction (required by modern browsers)
+  window.addEventListener("click", enableLeaveWarning);
+  window.addEventListener("keydown", enableLeaveWarning);
+  window.addEventListener("mousemove", enableLeaveWarning);
 })();
 </script>
 </body>
