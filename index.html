@@ -1196,6 +1196,58 @@ function buildUserBlock(text, animate, msgId, msgTs) {
   document.getElementById('msgsInner').appendChild(d); snapBot(); return d;
 }
 
+// Smart Auto-Fix & Beautify Chat Messages
+function fixChatMessages() {
+  const msgsInner = document.getElementById('msgsInner');
+  if (!msgsInner) return;
+
+  const messages = Array.from(msgsInner.children);
+  
+  messages.forEach((msg, index) => {
+    msg.classList.add('fixed-msg'); // mark as processed
+    msg.style.opacity = '0';
+    msg.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+    msg.style.transform = 'translateY(20px)';
+
+    // Fix header
+    const header = msg.querySelector('.mg-header');
+    if (header) {
+      const avatar = header.querySelector('.mg-av');
+      if (!avatar) {
+        const newAvatar = document.createElement('div');
+        newAvatar.className = msg.classList.contains('you') ? 'mg-av you' : 'mg-av ai';
+        newAvatar.textContent = msg.classList.contains('you') ? 'Y' : '';
+        header.prepend(newAvatar);
+      }
+    }
+
+    // Fix copy buttons
+    const acts = msg.querySelector('.mg-acts');
+    if (acts) {
+      const copyBtns = acts.querySelectorAll('button');
+      copyBtns.forEach(btn => {
+        btn.onclick = () => {
+          const body = msg.querySelector('.mg-body');
+          if (body) navigator.clipboard.writeText(body.innerText.trim());
+        };
+      });
+    }
+
+    // Smooth fade-in
+    setTimeout(() => {
+      msg.style.opacity = '1';
+      msg.style.transform = 'translateY(0)';
+    }, index * 150); // staggered animation
+  });
+}
+
+// Optional: observe new messages dynamically
+const observer = new MutationObserver(() => fixChatMessages());
+observer.observe(document.getElementById('msgsInner'), { childList: true });
+
+// Run initially
+fixChatMessages();
+
 function buildAiBlock(text, animate, msgId, msgTs) {
   var d=document.createElement('div'); d.className='mg';
   if(!animate) d.style.animation='none';
