@@ -1117,10 +1117,74 @@ function fbGiven(){ return '<div class="fb-given"><svg width="10" height="10" vi
 var AI_SVG = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>';
 
 function showWelcome() {
-  var inner=document.getElementById('msgsInner'); inner.innerHTML='';
-  var d=document.createElement('div'); d.id='welcome'; d.className='welcome';
-  d.innerHTML='<div class="w-orb-wrap"><div class="w-ring w-ring-2"></div><div class="w-ring w-ring-1"></div><div class="w-orb"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#080808" stroke-width="2.1" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg></div></div><h1>Hello. What shall<br>we <em>explore?</em></h1><p>Powered by Groq\'s ultra-fast inference.<br>Accurate, direct, and always available.</p><div class="prompt-grid"><div class="prompt-card" onclick="fillPrompt(this)"><div class="pc-cat">Explain</div><div class="pc-txt">How does HTTPS work end-to-end?</div></div><div class="prompt-card" onclick="fillPrompt(this)"><div class="pc-cat">Code</div><div class="pc-txt">TypeScript debounce hook with cancellation</div></div><div class="prompt-card" onclick="fillPrompt(this)"><div class="pc-cat">Write</div><div class="pc-txt">Cold email pitch for a freelance developer</div></div><div class="prompt-card" onclick="fillPrompt(this)"><div class="pc-cat">Analyze</div><div class="pc-txt">Core trade-offs between REST and GraphQL</div></div></div>';
+  const inner = document.getElementById('msgsInner'); 
+  inner.innerHTML = '';
+
+  const d = document.createElement('div'); 
+  d.id = 'welcome'; 
+  d.className = 'welcome';
+
+  d.innerHTML = `
+    <div class="w-orb-wrap">
+      <div class="w-ring w-ring-2"></div>
+      <div class="w-ring w-ring-1"></div>
+      <div class="w-orb">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#080808" stroke-width="2.1" stroke-linecap="round">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>
+        </svg>
+      </div>
+    </div>
+    <h1>
+      Hello. What shall<br>
+      we <em>explore?</em>
+      <a href="https://alburnett.neocities.org/" target="_blank" class="new-tab-icon" title="Open in a new tab">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#080808" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 3h3v3"/>
+          <path d="M14 10l7-7"/>
+          <path d="M21 21H3V3h9"/>
+        </svg>
+      </a>
+    </h1>
+    <p>Powered by Groq's ultra-fast inference.<br>Accurate, direct, and always available.</p>
+    <div class="prompt-grid">
+      <div class="prompt-card" onclick="fillPrompt(this)">
+        <div class="pc-cat">Explain</div>
+        <div class="pc-txt">How does HTTPS work end-to-end?</div>
+      </div>
+      <div class="prompt-card" onclick="fillPrompt(this)">
+        <div class="pc-cat">Code</div>
+        <div class="pc-txt">TypeScript debounce hook with cancellation</div>
+      </div>
+      <div class="prompt-card" onclick="fillPrompt(this)">
+        <div class="pc-cat">Write</div>
+        <div class="pc-txt">Cold email pitch for a freelance developer</div>
+      </div>
+      <div class="prompt-card" onclick="fillPrompt(this)">
+        <div class="pc-cat">Analyze</div>
+        <div class="pc-txt">Core trade-offs between REST and GraphQL</div>
+      </div>
+    </div>
+  `;
+
   inner.appendChild(d);
+
+  // Optional: Add some hover effect for the new tab icon
+  const style = document.createElement('style');
+  style.innerHTML = `
+    .new-tab-icon {
+      display: inline-block;
+      margin-left: 6px;
+      vertical-align: middle;
+      opacity: 0.7;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    .new-tab-icon:hover {
+      opacity: 1;
+      transform: translateY(-2px);
+    }
+  `;
+  document.head.appendChild(style);
 }
 
 function buildUserBlock(text, animate, msgId, msgTs) {
