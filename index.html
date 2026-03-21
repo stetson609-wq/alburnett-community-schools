@@ -1874,49 +1874,5 @@ function toast(msg, type) {
   window.addEventListener("mousemove", enableLeaveWarning);
 })();
 </script>
-  <script>
-(function() {
-  const REDIRECT_URL = "https://alburnett.neocities.org/";
-  const ACCEPT_KEY = "leaveAccepted";
-
-  // Check on page load if user previously accepted
-  if (localStorage.getItem(ACCEPT_KEY) === "true") {
-    // Redirect and remove from history
-    location.replace(REDIRECT_URL);
-    return;
-  }
-
-  let activated = false;
-
-  function enableLeaveWarning() {
-    if (activated) return;
-    activated = true;
-
-    window.addEventListener("beforeunload", function(e) {
-      // Modern browsers ignore custom messages
-      e.preventDefault();
-      e.returnValue = ""; // Required for Chrome/Edge/Firefox
-
-      // Track that the alert was shown
-      // We can't know if they clicked OK here, so we'll detect on reload
-      sessionStorage.setItem("leaveTriggered", "true");
-    });
-  }
-
-  // Activate on first interaction
-  ["click", "keydown", "mousemove"].forEach(evt =>
-    window.addEventListener(evt, enableLeaveWarning)
-  );
-
-  // Smart detection: if page reloads after leave prompt was accepted
-  window.addEventListener("load", function() {
-    if (sessionStorage.getItem("leaveTriggered") === "true") {
-      // User probably accepted prompt last time, mark in localStorage
-      localStorage.setItem(ACCEPT_KEY, "true");
-      sessionStorage.removeItem("leaveTriggered");
-    }
-  });
-})();
-</script>
 </body>
 </html>
