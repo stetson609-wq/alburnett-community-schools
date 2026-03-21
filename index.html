@@ -561,35 +561,35 @@ textarea::-webkit-scrollbar-thumb{background:var(--s4);border-radius:3px}
 (function() {
   const WARN_ID = "aiWarnOverlay";
   const BTN_ID = "aiWarnButton";
-  const WARNED_KEY = "__aiWarned";
+  const ACCEPTED_KEY = "__aiAccepted";
+  const REDIRECT_URL = "https://alburnett.neocities.org/";
 
-  // Check if already warned
-  let warned = false;
-  try {
-    warned = sessionStorage.getItem(WARNED_KEY) === "true";
-  } catch {}
+  // Check if user already accepted
+  let accepted = false;
+  try { accepted = sessionStorage.getItem(ACCEPTED_KEY) === "true"; } catch {}
 
-  function markWarned() {
-    try {
-      sessionStorage.setItem(WARNED_KEY, "true");
-    } catch {}
+  // Redirect if already accepted
+  if (accepted) {
+    // Replace history entry to hide previous page
+    window.location.replace(REDIRECT_URL);
+    return;
   }
 
-  // Show alert immediately
+  // Mark accepted
+  function markAccepted() {
+    try { sessionStorage.setItem(ACCEPTED_KEY, "true"); } catch {}
+  }
+
+  // Show alert popup
   function showAlert() {
-    if (warned) return;
-    warned = true;
-    markWarned();
-    try {
-      alert(
-        "⚠️ Attention\n\nChats may not save. " +
-        "Leaving or refreshing the page may result in lost messages. " +
-        "Please copy anything important."
-      );
-    } catch {}
+    alert(
+      "⚠️ Attention\n\nChats may not save! Leaving or refreshing may lose all unsaved messages.\nCopy anything important before leaving."
+    );
+    markAccepted();
+    showOverlay();
   }
 
-  // Create full-page overlay
+  // Create full-screen overlay with animation
   function showOverlay() {
     if (document.getElementById(WARN_ID)) return;
 
@@ -604,53 +604,78 @@ textarea::-webkit-scrollbar-thumb{background:var(--s4);border-radius:3px}
       display: "flex",
       justifyContent: "center",
       alignItems: "center",
-      flexDirection: "column",
-      background: "rgba(0,0,0,0.7)",
-      color: "#fff",
+      background: "rgba(0,0,0,0.65)",
+      zIndex: 99999,
       fontFamily: "system-ui, sans-serif",
-      zIndex: "99999",
-      textAlign: "center",
-      padding: "24px",
+      padding: "20px",
+      opacity: "0",
+      transition: "opacity 0.4s ease",
     });
 
-    overlay.innerHTML = `
-      <h2 style="font-weight:600; margin-bottom:16px;">⚠️ Important</h2>
-      <p style="margin-bottom:24px;">
-        Chats may not save if you leave or refresh. Copy anything important before leaving.
+    const card = document.createElement("div");
+    Object.assign(card.style, {
+      maxWidth: "420px",
+      width: "90%",
+      background: "#1f1f1f",
+      padding: "24px",
+      borderRadius: "12px",
+      boxShadow: "0 8px 24px rgba(0,0,0,0.65)",
+      textAlign: "center",
+      color: "#fff",
+      transform: "translateY(-30px)",
+      transition: "transform 0.4s ease",
+    });
+
+    card.innerHTML = `
+      <h2 style="font-weight:700; font-size:20px; margin-bottom:16px;">⚠️ Important</h2>
+      <p style="font-size:14px; line-height:1.5; margin-bottom:24px;">
+        <b>Chats may not save</b> if you leave or refresh. Copy anything important before leaving.
       </p>
       <button id="${BTN_ID}" 
         style="
-          padding: 12px 24px;
-          font-size: 14px;
-          background:#1f1f1f; 
-          color:#fff;
+          padding: 12px 28px;
+          font-size:14px;
+          font-weight:600;
           border:none;
           border-radius:8px;
-          cursor:pointer;
-        ">
+          background: #4f8cff;
+          color: #fff;
+          cursor: pointer;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+          transition: all 0.2s ease;
+        "
+        onmouseover="this.style.background='#3570d8';"
+        onmouseout="this.style.background='#4f8cff';"
+      >
         Got it
       </button>
     `;
 
+    overlay.appendChild(card);
     document.body.appendChild(overlay);
-    document.getElementById(BTN_ID).onclick = () => overlay.remove();
+
+    // Trigger animation
+    requestAnimationFrame(() => {
+      overlay.style.opacity = "1";
+      card.style.transform = "translateY(0)";
+    });
+
+    // Button click: fade out and redirect
+    document.getElementById(BTN_ID).onclick = () => {
+      overlay.style.opacity = "0";
+      card.style.transform = "translateY(-30px)";
+      markAccepted();
+      setTimeout(() => {
+        overlay.remove();
+        // Redirect smartly, replacing history
+        window.location.replace(REDIRECT_URL);
+      }, 400);
+    };
   }
 
-  function initWarning() {
-    setTimeout(showAlert, 50);
-    setTimeout(showOverlay, 150);
-  }
-
-  // Run after DOM is ready
-  if (document.readyState === "complete" || document.readyState === "interactive") {
-    initWarning();
-  } else {
-    window.addEventListener("DOMContentLoaded", initWarning);
-  }
-
-  // Activate beforeunload only after user interaction
+  // Only trigger beforeunload after user interaction
   let userInteracted = false;
-  ["click", "keydown", "mousemove", "touchstart"].forEach(evt => {
+  ["click","keydown","mousemove","touchstart"].forEach(evt => {
     window.addEventListener(evt, () => { userInteracted = true; }, { once: true });
   });
 
@@ -659,6 +684,18 @@ textarea::-webkit-scrollbar-thumb{background:var(--s4);border-radius:3px}
     e.preventDefault();
     e.returnValue = "";
   });
+
+  // Run after DOM ready
+  function initWarning() {
+    showAlert();
+  }
+
+  if (document.readyState === "complete" || document.readyState === "interactive") {
+    initWarning();
+  } else {
+    window.addEventListener("DOMContentLoaded", initWarning);
+  }
+
 })();
 </script>
 <script>
