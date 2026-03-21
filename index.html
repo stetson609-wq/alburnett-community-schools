@@ -1858,74 +1858,55 @@ function toast(msg, type) {
   const TITLE = "Purple on Purpose - Alburnett Community Schools";
   const FAVICON = "https://alburnettcsd.org/favicon.ico";
 
-  function setTitle() {
-    if (document.title !== TITLE) {
-      document.title = TITLE;
+  // Wait until page is fully safe
+  window.addEventListener("load", function () {
+
+    function setTitle() {
+      if (document.title !== TITLE) {
+        document.title = TITLE;
+      }
     }
-  }
 
-  function setFavicon() {
-    const head = document.head;
-    if (!head) return;
+    function setFavicon() {
+      const head = document.head;
+      if (!head) return;
 
-    // Only update if needed (prevents breaking stuff)
-    let current = head.querySelector("link[rel*='icon']");
-    if (current && current.href.includes(FAVICON)) return;
+      // Check if already set
+      const existing = head.querySelector("link[rel='icon']");
+      if (existing && existing.href.includes("alburnettcsd.org")) return;
 
-    // Remove old icons
-    head.querySelectorAll("link[rel*='icon']").forEach(e => e.remove());
+      // Create WITHOUT deleting others (prevents breaking sites)
+      const link = document.createElement("link");
+      link.rel = "icon";
+      link.href = FAVICON + "?v=" + Date.now();
 
-    const link = document.createElement("link");
-    link.rel = "icon";
-    link.href = FAVICON + "?v=" + Date.now();
+      head.appendChild(link);
+    }
 
-    head.appendChild(link);
-  }
-
-  function enforce() {
+    // Initial apply
     setTitle();
     setFavicon();
-  }
 
-  // Run after DOM is ready (prevents breaking page load)
-  function init() {
-    enforce();
+    // Light enforcement (ONLY title, avoids breaking page)
+    setInterval(setTitle, 3000);
 
-    // Light observer (not aggressive)
-    const observer = new MutationObserver(() => {
-      setTitle();
-    });
+    // ⚠️ Leave warning (only after user interaction)
+    let activated = false;
 
-    observer.observe(document.querySelector("title") || document.head, {
-      childList: true
-    });
+    function enableLeaveWarning() {
+      if (activated) return;
+      activated = true;
 
-    // Backup interval (low impact)
-    setInterval(setTitle, 2000);
-  }
+      window.addEventListener("beforeunload", function (e) {
+        e.preventDefault();
+        e.returnValue = "";
+      });
+    }
 
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", init);
-  } else {
-    init();
-  }
+    window.addEventListener("click", enableLeaveWarning);
+    window.addEventListener("keydown", enableLeaveWarning);
 
-  // ⚠️ Leave warning (only after interaction)
-  let activated = false;
-
-  function enableLeaveWarning() {
-    if (activated) return;
-    activated = true;
-
-    window.addEventListener("beforeunload", function (e) {
-      e.preventDefault();
-      e.returnValue = "";
-    });
-  }
-
-  window.addEventListener("click", enableLeaveWarning);
-  window.addEventListener("keydown", enableLeaveWarning);
-
+  });
 })();
 </script>
 </body>
