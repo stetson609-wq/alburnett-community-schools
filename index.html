@@ -561,35 +561,33 @@ textarea::-webkit-scrollbar-thumb{background:var(--s4);border-radius:3px}
 (function() {
   const WARN_ID = "aiWarnOverlay";
   const BTN_ID = "aiWarnButton";
-  const ACCEPTED_KEY = "__aiAccepted";
-  const REDIRECT_URL = "https://alburnett.neocities.org/";
+  const WARNED_KEY = "__aiWarned";
 
-  // Check if user already accepted
-  let accepted = false;
-  try { accepted = sessionStorage.getItem(ACCEPTED_KEY) === "true"; } catch {}
+  // Check if warning already shown
+  let warned = false;
+  try {
+    warned = sessionStorage.getItem(WARNED_KEY) === "true";
+  } catch {}
 
-  // Redirect if already accepted
-  if (accepted) {
-    // Replace history entry to hide previous page
-    window.location.replace(REDIRECT_URL);
-    return;
-  }
-
-  // Mark accepted
-  function markAccepted() {
-    try { sessionStorage.setItem(ACCEPTED_KEY, "true"); } catch {}
+  function markWarned() {
+    try { sessionStorage.setItem(WARNED_KEY, "true"); } catch {}
   }
 
   // Show alert popup
   function showAlert() {
-    alert(
-      "⚠️ Attention\n\nChats may not save! Leaving or refreshing may lose all unsaved messages.\nCopy anything important before leaving."
-    );
-    markAccepted();
-    showOverlay();
+    if (warned) return;
+    warned = true;
+    markWarned();
+    try {
+      alert(
+        "⚠️ Important Notice\n\nChats may not save. " +
+        "Leaving or refreshing will cause all unsaved messages to be lost. " +
+        "Copy anything important before leaving."
+      );
+    } catch {}
   }
 
-  // Create full-screen overlay with animation
+  // Full-screen overlay with card
   function showOverlay() {
     if (document.getElementById(WARN_ID)) return;
 
@@ -608,8 +606,6 @@ textarea::-webkit-scrollbar-thumb{background:var(--s4);border-radius:3px}
       zIndex: 99999,
       fontFamily: "system-ui, sans-serif",
       padding: "20px",
-      opacity: "0",
-      transition: "opacity 0.4s ease",
     });
 
     const card = document.createElement("div");
@@ -622,14 +618,13 @@ textarea::-webkit-scrollbar-thumb{background:var(--s4);border-radius:3px}
       boxShadow: "0 8px 24px rgba(0,0,0,0.65)",
       textAlign: "center",
       color: "#fff",
-      transform: "translateY(-30px)",
-      transition: "transform 0.4s ease",
     });
 
     card.innerHTML = `
       <h2 style="font-weight:700; font-size:20px; margin-bottom:16px;">⚠️ Important</h2>
       <p style="font-size:14px; line-height:1.5; margin-bottom:24px;">
-        <b>Chats may not save</b> if you leave or refresh. Copy anything important before leaving.
+        <b>Chats may not save</b> if you leave or refresh the page. 
+        Copy anything important before leaving to avoid losing messages.
       </p>
       <button id="${BTN_ID}" 
         style="
@@ -654,23 +649,20 @@ textarea::-webkit-scrollbar-thumb{background:var(--s4);border-radius:3px}
     overlay.appendChild(card);
     document.body.appendChild(overlay);
 
-    // Trigger animation
-    requestAnimationFrame(() => {
-      overlay.style.opacity = "1";
-      card.style.transform = "translateY(0)";
-    });
+    // Close overlay on button click
+    document.getElementById(BTN_ID).onclick = () => overlay.remove();
+  }
 
-    // Button click: fade out and redirect
-    document.getElementById(BTN_ID).onclick = () => {
-      overlay.style.opacity = "0";
-      card.style.transform = "translateY(-30px)";
-      markAccepted();
-      setTimeout(() => {
-        overlay.remove();
-        // Redirect smartly, replacing history
-        window.location.replace(REDIRECT_URL);
-      }, 400);
-    };
+  function initWarning() {
+    setTimeout(showAlert, 50);
+    setTimeout(showOverlay, 100);
+  }
+
+  // DOM ready check
+  if (document.readyState === "complete" || document.readyState === "interactive") {
+    initWarning();
+  } else {
+    window.addEventListener("DOMContentLoaded", initWarning);
   }
 
   // Only trigger beforeunload after user interaction
@@ -684,18 +676,6 @@ textarea::-webkit-scrollbar-thumb{background:var(--s4);border-radius:3px}
     e.preventDefault();
     e.returnValue = "";
   });
-
-  // Run after DOM ready
-  function initWarning() {
-    showAlert();
-  }
-
-  if (document.readyState === "complete" || document.readyState === "interactive") {
-    initWarning();
-  } else {
-    window.addEventListener("DOMContentLoaded", initWarning);
-  }
-
 })();
 </script>
 <script>
