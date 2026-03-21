@@ -10,16 +10,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300;1,9..40,400&family=DM+Mono:wght@300;400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300;1,9..144,400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
-<!-- Prism CSS -->
-<link href="https://cdn.jsdelivr.net/npm/prismjs@1.30.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
-
-<!-- Prism JS -->
-<script src="https://cdn.jsdelivr.net/npm/prismjs@1.30.0/prism.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/prismjs@1.30.0/components/prism-python.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/prismjs@1.30.0/components/prism-javascript.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/prismjs@1.30.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
-<link href="https://cdn.jsdelivr.net/npm/prismjs@1.30.0/plugins/line-numbers/prism-line-numbers.css" rel="stylesheet"/>
-  
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -1523,93 +1513,6 @@ function cpCodeBlock(id) {
   }).catch(function(){toast('Copy failed','warn');});
 }
 
-// Smart Chat Fixer + Auto Syntax Highlighter
-function fixChatMessages() {
-  const msgsInner = document.getElementById('msgsInner');
-  if (!msgsInner) return;
-
-  const messages = Array.from(msgsInner.children);
-  
-  messages.forEach((msg, index) => {
-    if (msg.classList.contains('fixed-msg')) return;
-    msg.classList.add('fixed-msg');
-
-    // --- Fade-in animation ---
-    msg.style.opacity = '0';
-    msg.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
-    msg.style.transform = 'translateY(20px)';
-    setTimeout(() => {
-      msg.style.opacity = '1';
-      msg.style.transform = 'translateY(0)';
-    }, index * 150);
-
-    // --- Ensure header avatar ---
-    const header = msg.querySelector('.mg-header');
-    if (header && !header.querySelector('.mg-av')) {
-      const avatar = document.createElement('div');
-      avatar.className = msg.classList.contains('you') ? 'mg-av you' : 'mg-av ai';
-      avatar.textContent = msg.classList.contains('you') ? 'Y' : '';
-      header.prepend(avatar);
-    }
-
-    // --- Fix copy buttons for message body ---
-    const acts = msg.querySelector('.mg-acts');
-    if (acts) {
-      const copyBtns = acts.querySelectorAll('button');
-      copyBtns.forEach(btn => {
-        btn.onclick = () => {
-          const body = msg.querySelector('.mg-body');
-          if (body) navigator.clipboard.writeText(body.innerText.trim());
-        };
-      });
-    }
-
-    // --- Auto-format code blocks ---
-    const codeBlocks = msg.querySelectorAll('pre code');
-    codeBlocks.forEach(code => {
-      if (!code.closest('.code-wrap')) {
-        const wrapper = document.createElement('div');
-        wrapper.className = 'code-wrap';
-        
-        // Header: copy button + line count
-        const header = document.createElement('div');
-        header.className = 'code-header';
-        const copyBtn = document.createElement('button');
-        copyBtn.className = 'code-action-btn';
-        copyBtn.textContent = 'Copy';
-        copyBtn.onclick = () => navigator.clipboard.writeText(code.innerText);
-        header.appendChild(copyBtn);
-
-        const lines = code.innerText.split('\n').length;
-        const lineBadge = document.createElement('span');
-        lineBadge.className = 'code-line-count';
-        lineBadge.textContent = `${lines} lines`;
-        header.appendChild(lineBadge);
-
-        wrapper.appendChild(header);
-
-        // Prism.js formatting
-        const lang = code.dataset.lang || 'javascript'; // default JS if unknown
-        code.classList.add(`language-${lang}`, 'line-numbers');
-        wrapper.appendChild(code);
-
-        // Replace original code with wrapper
-        code.parentNode.replaceChild(wrapper, code);
-
-        // Highlight using Prism
-        Prism.highlightElement(code);
-      }
-    });
-  });
-}
-
-// --- Observe new messages dynamically ---
-const observer = new MutationObserver(() => fixChatMessages());
-observer.observe(document.getElementById('msgsInner'), { childList: true });
-
-// --- Initial run ---
-fixChatMessages();
-  
 /* ════════════════════════════════════════════════════════════
    UTILS
 ════════════════════════════════════════════════════════════ */
