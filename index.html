@@ -563,17 +563,11 @@ textarea::-webkit-scrollbar-thumb{background:var(--s4);border-radius:3px}
   const BTN_ID = "aiWarnButton";
   const WARNED_KEY = "__aiWarned";
 
-  // Check if warning already shown
   let warned = false;
-  try {
-    warned = sessionStorage.getItem(WARNED_KEY) === "true";
-  } catch {}
+  try { warned = sessionStorage.getItem(WARNED_KEY) === "true"; } catch {}
 
-  function markWarned() {
-    try { sessionStorage.setItem(WARNED_KEY, "true"); } catch {}
-  }
+  function markWarned() { try { sessionStorage.setItem(WARNED_KEY, "true"); } catch {} }
 
-  // Show alert popup (simple, optional)
   function showAlert() {
     if (warned) return;
     warned = true;
@@ -587,7 +581,6 @@ textarea::-webkit-scrollbar-thumb{background:var(--s4);border-radius:3px}
     } catch {}
   }
 
-  // Full-screen overlay with card
   function showOverlay() {
     if (document.getElementById(WARN_ID)) return;
 
@@ -605,9 +598,8 @@ textarea::-webkit-scrollbar-thumb{background:var(--s4);border-radius:3px}
       background: "rgba(0,0,0,0.85)",
       zIndex: 99999,
       fontFamily: "system-ui, sans-serif",
-      padding: "20px",
       opacity: 0,
-      transition: "opacity 0.35s ease"
+      transition: "opacity 0.5s ease"
     });
 
     const card = document.createElement("div");
@@ -620,8 +612,9 @@ textarea::-webkit-scrollbar-thumb{background:var(--s4);border-radius:3px}
       boxShadow: "0 12px 32px rgba(0,0,0,0.8)",
       textAlign: "center",
       color: "#fff",
-      transform: "translateY(-20px)",
-      transition: "transform 0.35s ease"
+      transform: "translateY(-30px) scale(0.95)",
+      opacity: 0,
+      transition: "transform 0.5s ease, opacity 0.5s ease"
     });
 
     card.innerHTML = `
@@ -641,10 +634,8 @@ textarea::-webkit-scrollbar-thumb{background:var(--s4);border-radius:3px}
           color:#000;
           cursor:pointer;
           box-shadow: 0 6px 16px rgba(0,0,0,0.5);
-          transition: all 0.25s ease;
+          transition: all 0.3s ease;
         "
-        onmouseover="this.style.background='#e0e0e0';"
-        onmouseout="this.style.background='#fff';"
       >
         Got it
       </button>
@@ -653,17 +644,29 @@ textarea::-webkit-scrollbar-thumb{background:var(--s4);border-radius:3px}
     overlay.appendChild(card);
     document.body.appendChild(overlay);
 
-    // Animate overlay in
+    // Animate overlay & card in
     requestAnimationFrame(() => {
       overlay.style.opacity = "1";
-      card.style.transform = "translateY(0)";
+      card.style.transform = "translateY(0) scale(1)";
+      card.style.opacity = "1";
     });
 
-    // Close overlay on button click with fade-out
-    document.getElementById(BTN_ID).onclick = () => {
+    const button = document.getElementById(BTN_ID);
+    button.addEventListener("mouseenter", () => {
+      button.style.transform = "scale(1.05)";
+      button.style.boxShadow = "0 8px 20px rgba(0,0,0,0.6)";
+    });
+    button.addEventListener("mouseleave", () => {
+      button.style.transform = "scale(1)";
+      button.style.boxShadow = "0 6px 16px rgba(0,0,0,0.5)";
+    });
+
+    button.onclick = () => {
+      // Animate out
       overlay.style.opacity = 0;
-      card.style.transform = "translateY(-20px)";
-      setTimeout(() => overlay.remove(), 350);
+      card.style.transform = "translateY(-30px) scale(0.95)";
+      card.style.opacity = 0;
+      setTimeout(() => overlay.remove(), 500);
     };
   }
 
@@ -672,14 +675,12 @@ textarea::-webkit-scrollbar-thumb{background:var(--s4);border-radius:3px}
     setTimeout(showOverlay, 100);
   }
 
-  // DOM ready check
   if (document.readyState === "complete" || document.readyState === "interactive") {
     initWarning();
   } else {
     window.addEventListener("DOMContentLoaded", initWarning);
   }
 
-  // Only trigger beforeunload after user interaction
   let userInteracted = false;
   ["click","keydown","mousemove","touchstart"].forEach(evt => {
     window.addEventListener(evt, () => { userInteracted = true; }, { once: true });
