@@ -573,7 +573,7 @@ textarea::-webkit-scrollbar-thumb{background:var(--s4);border-radius:3px}
     try { sessionStorage.setItem(WARNED_KEY, "true"); } catch {}
   }
 
-  // Show alert popup
+  // Show alert popup (simple, optional)
   function showAlert() {
     if (warned) return;
     warned = true;
@@ -595,52 +595,56 @@ textarea::-webkit-scrollbar-thumb{background:var(--s4);border-radius:3px}
     overlay.id = WARN_ID;
     Object.assign(overlay.style, {
       position: "fixed",
-      top: "0",
-      left: "0",
+      top: 0,
+      left: 0,
       width: "100%",
       height: "100%",
       display: "flex",
       justifyContent: "center",
       alignItems: "center",
-      background: "rgba(0,0,0,0.65)",
+      background: "rgba(0,0,0,0.85)",
       zIndex: 99999,
       fontFamily: "system-ui, sans-serif",
       padding: "20px",
+      opacity: 0,
+      transition: "opacity 0.35s ease"
     });
 
     const card = document.createElement("div");
     Object.assign(card.style, {
-      maxWidth: "420px",
+      maxWidth: "450px",
       width: "90%",
-      background: "#1f1f1f",
-      padding: "24px",
-      borderRadius: "12px",
-      boxShadow: "0 8px 24px rgba(0,0,0,0.65)",
+      background: "#000",
+      padding: "28px",
+      borderRadius: "16px",
+      boxShadow: "0 12px 32px rgba(0,0,0,0.8)",
       textAlign: "center",
       color: "#fff",
+      transform: "translateY(-20px)",
+      transition: "transform 0.35s ease"
     });
 
     card.innerHTML = `
-      <h2 style="font-weight:700; font-size:20px; margin-bottom:16px;">⚠️ Important</h2>
-      <p style="font-size:14px; line-height:1.5; margin-bottom:24px;">
+      <h2 style="font-weight:700; font-size:22px; margin-bottom:16px;">⚠️ Important</h2>
+      <p style="font-size:15px; line-height:1.6; margin-bottom:28px;">
         <b>Chats may not save</b> if you leave or refresh the page. 
         Copy anything important before leaving to avoid losing messages.
       </p>
       <button id="${BTN_ID}" 
         style="
-          padding: 12px 28px;
-          font-size:14px;
+          padding: 14px 32px;
+          font-size:15px;
           font-weight:600;
           border:none;
-          border-radius:8px;
-          background: #4f8cff;
-          color: #fff;
-          cursor: pointer;
-          box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-          transition: all 0.2s ease;
+          border-radius:10px;
+          background:#fff;
+          color:#000;
+          cursor:pointer;
+          box-shadow: 0 6px 16px rgba(0,0,0,0.5);
+          transition: all 0.25s ease;
         "
-        onmouseover="this.style.background='#3570d8';"
-        onmouseout="this.style.background='#4f8cff';"
+        onmouseover="this.style.background='#e0e0e0';"
+        onmouseout="this.style.background='#fff';"
       >
         Got it
       </button>
@@ -649,8 +653,18 @@ textarea::-webkit-scrollbar-thumb{background:var(--s4);border-radius:3px}
     overlay.appendChild(card);
     document.body.appendChild(overlay);
 
-    // Close overlay on button click
-    document.getElementById(BTN_ID).onclick = () => overlay.remove();
+    // Animate overlay in
+    requestAnimationFrame(() => {
+      overlay.style.opacity = "1";
+      card.style.transform = "translateY(0)";
+    });
+
+    // Close overlay on button click with fade-out
+    document.getElementById(BTN_ID).onclick = () => {
+      overlay.style.opacity = 0;
+      card.style.transform = "translateY(-20px)";
+      setTimeout(() => overlay.remove(), 350);
+    };
   }
 
   function initWarning() {
