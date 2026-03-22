@@ -558,34 +558,7 @@ textarea::-webkit-scrollbar-thumb{background:var(--s4);border-radius:3px}
   </main>
 </div>
 <script>
-(function() {
-  // 1️⃣ Replace text in a node recursively
-  function replaceTextNode(node) {
-    if (node.nodeType === Node.TEXT_NODE) {
-      if (node.textContent.includes('Lumen')) {
-        node.textContent = node.textContent.replace(/Lumen/g, 'Aurora');
-      }
-    } else {
-      node.childNodes.forEach(replaceTextNode);
-    }
-  }
 
-  // 2️⃣ Initial replacement on page load
-  replaceTextNode(document.body);
-
-  // 3️⃣ Observe DOM for dynamically added content
-  const observer = new MutationObserver(mutations => {
-    mutations.forEach(mutation => {
-      mutation.addedNodes.forEach(node => {
-        replaceTextNode(node);
-      });
-    });
-  });
-
-  observer.observe(document.body, { childList: true, subtree: true });
-})();
-</script>
-<script>
   // 7️⃣ Smooth scrolling for chat containers
   function smoothScroll() {
     document.querySelectorAll('.msgs-wrap').forEach(container => {
@@ -723,7 +696,7 @@ Press OK to continue.
   var W, H, pts = [], mx = -9999, my = -9999;
   function resize() { W = c.width = window.innerWidth; H = c.height = window.innerHeight; }
   function init() {
-    var n = Math.floor(W * H / 18000);
+    var n = Math.floor(W * H / 18000 * 1.2);
     pts = [];
     for (var i = 0; i < n; i++) pts.push({ x: Math.random()*W, y: Math.random()*H, vx: (Math.random()-.5)*.19, vy: (Math.random()-.5)*.19, r: Math.random()*1.4+.35, o: Math.random()*.42+.12 });
   }
