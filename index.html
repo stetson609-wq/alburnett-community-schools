@@ -558,6 +558,26 @@ textarea::-webkit-scrollbar-thumb{background:var(--s4);border-radius:3px}
   </main>
 </div>
 <script>
+
+  // 7️⃣ Smooth scrolling for chat containers
+  function smoothScroll() {
+    document.querySelectorAll('.msgs-wrap').forEach(container => {
+      container.style.overflowY = 'auto';
+      container.style.scrollBehavior = 'smooth';
+      container.style.webkitOverflowScrolling = 'touch';
+      container.style.willChange = 'transform';
+      const inner = container.querySelector('.msgs-inner');
+      if (inner) inner.style.transform = 'translateZ(0)';
+    });
+  }
+  smoothScroll();
+
+  // 8️⃣ Observe dynamically added chat containers
+  const observer = new MutationObserver(() => smoothScroll());
+  observer.observe(document.body, { childList: true, subtree: true });
+})();
+</script>
+<script>
 (function() {
   const replacements = [
     { selector: '.w-orb', src: 'https://i.ibb.co/hxNcR62b/Futuristic-Aurora-GPT-logo-design.png', alt: 'Aurora Orb', circular: true, scale: 1.2 },
