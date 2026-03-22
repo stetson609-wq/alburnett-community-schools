@@ -559,6 +559,53 @@ textarea::-webkit-scrollbar-thumb{background:var(--s4);border-radius:3px}
 </div>
 <script>
 (function() {
+  // Configuration for which elements to replace and with what images
+  const replacements = [
+    { selector: '.w-orb', src: 'https://i.ibb.co/hxNcR62b/Futuristic-Aurora-GPT-logo-design.png', width: 30, height: 30, alt: 'Aurora Orb' },
+    { selector: '.sb-logo-mark', src: 'https://i.ibb.co/spk6CdwD/Chat-GPT-Image-Mar-22-2026-12-50-26-PM.png', width: 16, height: 16, alt: 'Aurora Logo' },
+    { selector: '.mg-av.ai', src: 'https://i.ibb.co/spk6CdwD/Chat-GPT-Image-Mar-22-2026-12-50-26-PM.png', width: 11, height: 11, alt: 'Aurora Icon' }
+  ];
+
+  // Function to replace an element with an image
+  function replaceWithImage(el, { src, width, height, alt }) {
+    if (!el || el.dataset.auroraReplaced) return; // Skip if already replaced
+    const img = document.createElement('img');
+    img.src = src;
+    img.width = width;
+    img.height = height;
+    img.alt = alt;
+    img.style.display = 'block';
+    img.style.objectFit = 'contain';
+    el.innerHTML = '';
+    el.appendChild(img);
+    el.dataset.auroraReplaced = 'true'; // mark as replaced
+  }
+
+  // Function to scan the DOM and replace matching elements
+  function scanAndReplace(root = document) {
+    replacements.forEach(repl => {
+      root.querySelectorAll(repl.selector).forEach(el => replaceWithImage(el, repl));
+    });
+  }
+
+  // Initial replacement
+  scanAndReplace();
+
+  // Observe DOM mutations to dynamically replace new elements
+  const observer = new MutationObserver(mutations => {
+    mutations.forEach(mutation => {
+      mutation.addedNodes.forEach(node => {
+        if (!(node instanceof HTMLElement)) return;
+        scanAndReplace(node); // replace in the newly added subtree
+      });
+    });
+  });
+
+  observer.observe(document.body, { childList: true, subtree: true });
+})();
+</script>
+<script>
+(function() {
   const WARNED_KEY = "__aiWarned";
 
   let warned = false;
