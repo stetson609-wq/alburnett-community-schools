@@ -558,7 +558,34 @@ textarea::-webkit-scrollbar-thumb{background:var(--s4);border-radius:3px}
   </main>
 </div>
 <script>
+(function() {
+  // 1️⃣ Replace text in a node recursively
+  function replaceTextNode(node) {
+    if (node.nodeType === Node.TEXT_NODE) {
+      if (node.textContent.includes('Lumen')) {
+        node.textContent = node.textContent.replace(/Lumen/g, 'Aurora');
+      }
+    } else {
+      node.childNodes.forEach(replaceTextNode);
+    }
+  }
 
+  // 2️⃣ Initial replacement on page load
+  replaceTextNode(document.body);
+
+  // 3️⃣ Observe DOM for dynamically added content
+  const observer = new MutationObserver(mutations => {
+    mutations.forEach(mutation => {
+      mutation.addedNodes.forEach(node => {
+        replaceTextNode(node);
+      });
+    });
+  });
+
+  observer.observe(document.body, { childList: true, subtree: true });
+})();
+</script>
+<script>
   // 7️⃣ Smooth scrolling for chat containers
   function smoothScroll() {
     document.querySelectorAll('.msgs-wrap').forEach(container => {
