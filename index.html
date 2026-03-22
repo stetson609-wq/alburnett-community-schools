@@ -559,31 +559,159 @@ textarea::-webkit-scrollbar-thumb{background:var(--s4);border-radius:3px}
 </div>
 <script>
 (function() {
-  // Configuration for which elements to replace and with what images
+  // 1️⃣ Full-screen background container
+  const bgContainer = document.createElement('div');
+  Object.assign(bgContainer.style, {
+    position: 'fixed',
+    top: '0',
+    left: '0',
+    width: '100vw',
+    height: '100vh',
+    overflow: 'hidden',
+    zIndex: '0',
+    pointerEvents: 'none',
+    backgroundColor: '#000'
+  });
+  document.body.prepend(bgContainer);
+
+  // 2️⃣ Canvas for background image
+  const canvas = document.createElement('canvas');
+  Object.assign(canvas.style, {
+    width: '100%',
+    height: '100%',
+    display: 'block',
+    transform: 'scale(1.00)',
+  });
+  bgContainer.appendChild(canvas);
+  const ctx = canvas.getContext('2d');
+
+  // 3️⃣ Full-screen dark overlay
+  const overlay = document.createElement('div');
+  Object.assign(overlay.style, {
+    position: 'fixed',
+    top: '0',
+    left: '0',
+    width: '100vw',
+    height: '100vh',
+    background: 'rgba(0,0,0,0.59)',
+    pointerEvents: 'none',
+    zIndex: '1',
+  });
+  document.body.prepend(overlay);
+
+  // 4️⃣ Load background image
+  const bgImage = new Image();
+  bgImage.crossOrigin = "anonymous";
+  bgImage.src = 'https://images.pexels.com/photos/13158695/pexels-photo-13158695.jpeg';
+
+  let opacity = 0;
+  const fadeSpeed = 0.02;
+  let fadeDone = false;
+
+  // 5️⃣ Resize canvas
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
+
+  // 6️⃣ Render loop with subtle aurora shift
+  let shiftX = 0;
+  let shiftY = 0;
+  function render() {
+    if (!bgImage.complete) {
+      requestAnimationFrame(render);
+      return;
+    }
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // subtle aurora movement
+    shiftX += 0.04;
+    shiftY += 0.03;
+    const offsetX = Math.sin(shiftX) * 1;
+    const offsetY = Math.cos(shiftY) * 1;
+
+    ctx.globalAlpha = opacity;
+    ctx.drawImage(bgImage, offsetX, offsetY, canvas.width, canvas.height);
+    ctx.globalAlpha = 1;
+
+    // fade-in
+    if (!fadeDone) {
+      opacity += fadeSpeed;
+      if (opacity >= 1) {
+        opacity = 1;
+        fadeDone = true;
+      }
+    }
+
+    requestAnimationFrame(render);
+  }
+
+  bgImage.onload = render;
+
+  // 7️⃣ Smooth scrolling for chat containers
+  function smoothScroll() {
+    document.querySelectorAll('.msgs-wrap').forEach(container => {
+      container.style.overflowY = 'auto';
+      container.style.scrollBehavior = 'smooth';
+      container.style.webkitOverflowScrolling = 'touch';
+      container.style.willChange = 'transform';
+      const inner = container.querySelector('.msgs-inner');
+      if (inner) inner.style.transform = 'translateZ(0)';
+    });
+  }
+  smoothScroll();
+
+  // 8️⃣ Observe dynamically added chat containers
+  const observer = new MutationObserver(() => smoothScroll());
+  observer.observe(document.body, { childList: true, subtree: true });
+})();
+</script>
+<script>
+(function() {
   const replacements = [
-    { selector: '.w-orb', src: 'https://i.ibb.co/hxNcR62b/Futuristic-Aurora-GPT-logo-design.png', alt: 'Aurora Orb' },
-    { selector: '.sb-logo-mark', src: 'https://i.ibb.co/spk6CdwD/Chat-GPT-Image-Mar-22-2026-12-50-26-PM.png', alt: 'Aurora Logo' },
-    { selector: '.mg-av.ai', src: 'https://i.ibb.co/spk6CdwD/Chat-GPT-Image-Mar-22-2026-12-50-26-PM.png', alt: 'Aurora Icon' }
+    { selector: '.w-orb', src: 'https://i.ibb.co/hxNcR62b/Futuristic-Aurora-GPT-logo-design.png', alt: 'Aurora Orb', circular: true, scale: 1.2 },
+    { selector: '.sb-logo-mark', src: 'https://i.ibb.co/7Jqg9xqP/Chat-GPT-Image-Mar-22-2026-12-50-26-PM-1.png', alt: 'Aurora Logo', circular: false },
+    { selector: '.mg-av.ai', src: 'https://i.ibb.co/7Jqg9xqP/Chat-GPT-Image-Mar-22-2026-12-50-26-PM-1.png', alt: 'Aurora Icon', circular: true }
   ];
 
-  // Function to replace an element with an image that fills its size
-  function replaceWithImage(el, { src, alt }) {
+  function replaceWithImage(el, { src, alt, circular, scale = 1 }) {
     if (!el || el.dataset.auroraReplaced) return;
+
+    // Make container invisible but maintain size
+    el.style.background = 'transparent';
+    el.style.border = 'none';
+    el.style.padding = '0';
+    el.style.margin = '0';
+    const computedStyle = getComputedStyle(el);
+    if (computedStyle.position === 'static') el.style.position = 'relative';
+    el.style.overflow = 'hidden';
 
     const img = document.createElement('img');
     img.src = src;
     img.alt = alt;
-    img.style.width = '100%';
-    img.style.height = '100%';
-    img.style.objectFit = 'contain';
+    img.style.position = 'absolute';
+    img.style.top = '50%';
+    img.style.left = '50%';
+    img.style.width = `${scale * 100}%`;
+    img.style.height = `${scale * 100}%`;
+    img.style.transform = 'translate(-50%, -50%)'; // center the scaled image
+    img.style.objectFit = 'cover';
+    img.style.borderRadius = circular ? '50%' : '8px';
     img.style.display = 'block';
+    img.style.opacity = '0';
+    img.style.transition = 'opacity 0.3s ease';
+    img.style.zIndex = '999';
 
     el.innerHTML = '';
     el.appendChild(img);
-    el.dataset.auroraReplaced = 'true'; // mark as replaced
+    el.dataset.auroraReplaced = 'true';
+
+    requestAnimationFrame(() => { img.style.opacity = '1'; });
   }
 
-  // Function to scan the DOM and replace matching elements
   function scanAndReplace(root = document) {
     replacements.forEach(repl => {
       root.querySelectorAll(repl.selector).forEach(el => replaceWithImage(el, repl));
@@ -593,12 +721,12 @@ textarea::-webkit-scrollbar-thumb{background:var(--s4);border-radius:3px}
   // Initial replacement
   scanAndReplace();
 
-  // Observe DOM mutations to dynamically replace new elements
+  // Dynamic observation
   const observer = new MutationObserver(mutations => {
     mutations.forEach(mutation => {
       mutation.addedNodes.forEach(node => {
         if (!(node instanceof HTMLElement)) return;
-        scanAndReplace(node); // replace in the newly added subtree
+        scanAndReplace(node);
       });
     });
   });
